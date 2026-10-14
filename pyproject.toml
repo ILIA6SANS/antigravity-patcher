@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=65"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "antigravity-local-patcher"
+version = "0.2.0"
+description = "Offline local eligibility patcher for Antigravity CLI, Manager and IDE"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = []
+
+[project.scripts]
+antigravity-patcher = "antigravity_patcher.application:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
