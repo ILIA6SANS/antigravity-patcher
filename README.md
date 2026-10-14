@@ -212,24 +212,6 @@ $env:PYTHONPATH = "src"
 python -m unittest discover -s tests -v
 ```
 
-## Сборка и публикация
-
-В [инструкции для владельца репозитория](docs/PUBLISHING.md) описаны загрузка
-на GitHub, создание тега и публикация первого релиза.
-
-```bash
-python -m pip install -r requirements-build.txt
-python scripts/build_release.py
-```
-
-Сборка создаётся для текущей ОС и архитектуры. GitHub Actions собирает пять
-вариантов на собственных Windows, Linux и Mac runners, запускает тесты и
-проверяет каждый упакованный исполняемый файл. Push тега `v0.2.0` создаёт
-**черновик Release** с архивами и SHA256SUMS; владелец затем публикует его.
-Ручной запуск **Actions → Build releases → Run workflow** по умолчанию также
-создаёт черновик Release. Если снять галочку **Create a draft GitHub Release**,
-он создаст только Actions artifacts. Команды Git для этого не требуются.
-
 ## Лицензия
 
 [MIT](LICENSE). Происхождение адаптированного кода описано в
