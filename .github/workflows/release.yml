@@ -30,8 +30,8 @@ jobs:
             asset: macos-arm64
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.0.0
         with:
           python-version: '3.10'
       - name: Check that the tag matches the source version
@@ -47,7 +47,7 @@ jobs:
         run: python -m pip install -r requirements-build.txt
       - name: Build and smoke-test native executable
         run: python scripts/build_release.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: release-${{ matrix.asset }}
           path: release-assets/*
@@ -60,8 +60,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/download-artifact@v8.0.1
         with:
           pattern: release-*
           path: release-assets
@@ -77,7 +77,11 @@ jobs:
         run: |
           RELEASE_TAG="$(python3 -c 'from antigravity_patcher import __version__; print("v" + __version__)')"
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = true
+            IS_DRAFT="$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)"
+            if [ "$IS_DRAFT" != true ]; then
+              echo "::notice::Release $RELEASE_TAG is already published; keeping all published assets unchanged."
+              exit 0
+            fi
             gh release upload "$RELEASE_TAG" release-assets/* --clobber
           else
             gh release create "$RELEASE_TAG" release-assets/* --draft --target "$GITHUB_SHA" --title "Antigravity Local Patcher $RELEASE_TAG" --notes-file docs/RELEASE_NOTES.md
