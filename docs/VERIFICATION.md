@@ -14,10 +14,35 @@ Local host: Windows 10 x64 (10.0.19045), CPython 3.10.11, PyInstaller 6.19.0.
 - Windows file properties contain ProductVersion 0.2.0 and FileVersion 0.2.0.0.
 - Workflow YAML syntax and repository Markdown links are checked locally.
 
-Linux/macOS executables have **not** been built on this host. Native CI jobs
-must run in GitHub before those assets can be published. POSIX permissions and
-real macOS code-signing operations require their native environments; mocked
+Linux/macOS executables have **not** been built on this host. All five native
+GitHub CI builds subsequently completed successfully, including their packaged
+runtime smoke tests. Real macOS application signing requires validation against
+an installed Antigravity app; mocked
 signing failure tests validate rollback logic, not Apple's signing behavior.
+
+## First native CI run and test correction
+
+The first GitHub release run built and smoke-tested Windows x64 and both Linux
+architectures successfully. Both macOS jobs stopped at the Test step. The old
+Windows-backup test incorrectly expected import to succeed on macOS, where the
+runtime intentionally refuses that unsigned legacy format.
+
+The Windows legacy test now explicitly exercises the Windows branch; a separate
+test verifies that macOS refuses legacy import without changing the target.
+All 14 test methods pass with Windows/Linux/macOS platform branches simulated
+locally (the POSIX permissions test remains skipped on the Windows host). This
+does not replace rerunning the native macOS jobs. Actions versions are pinned
+to current releases using the Node.js 24 runtime.
+
+The subsequent manual release workflow passed all native jobs and created a
+draft, which was published. Tag publication then triggered another build: all
+five native jobs passed, but the draft step failed because its guard used a
+failing shell test when the release was already public. That branch now exits
+successfully without uploading or replacing any published assets.
+Three tests execute the actual release shell step with a fake gh command:
+published release is unchanged, an existing draft receives assets, and a missing
+release is created as a draft. The updated local suite contains 17 methods,
+with 16 passing and the POSIX-only permission check skipped on Windows.
 
 The earlier Windows PowerShell IDE patch was reported working by the requester.
 This new build has not been exercised against the friend's real CLI/Manager

@@ -11,6 +11,7 @@
 - Add macOS signing snapshots and transactional ad-hoc signing.
 - Read verified backups from the earlier Windows PowerShell prototype.
 - Add transaction tests and an isolated packaged-runtime self-test.
+- Treat an already published release as a successful no-op; keep its assets unchanged.
 
 ## 0.1.0
 
