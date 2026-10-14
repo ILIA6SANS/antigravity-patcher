@@ -188,7 +188,18 @@ class EngineTests(unittest.TestCase):
         legacy.mkdir()
         (legacy/(original_hash+'.bin')).write_bytes(IDE)
         Path(str(t.path)+'.agpatch-state').write_text(f'AGPATCH1\n{original_hash}\n{changed_hash}\n')
-        engine.restore_group([t], self.backups)
+        # This legacy format belongs to the Windows prototype; exercise that
+        # platform's behavior even when the suite runs on a macOS CI runner.
+        with patch.object(engine.sys, 'platform', 'win32'):
+            engine.restore_group([t], self.backups)
+        self.assertEqual(t.path.read_bytes(), IDE)
+
+    def test_macos_rejects_unsigned_legacy_backup_import(self):
+        t = self.target(IDE)
+        Path(str(t.path)+'.agpatch-state').write_text('AGPATCH1\n')
+        with patch.object(engine.sys, 'platform', 'darwin'):
+            with self.assertRaisesRegex(OSError, 'No verified backup'):
+                engine.restore_group([t], self.backups)
         self.assertEqual(t.path.read_bytes(), IDE)
 
     def test_mode_is_preserved(self):
